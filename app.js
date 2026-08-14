@@ -2,6 +2,25 @@
    HABIT TRACKER — Premium Dashboard Engine
    ═══════════════════════════════════════════════════════════ */
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let currentUser = null;
+
+
 // ─── Constants ───
 const MONTH_NAMES = [
   'January','February','March','April','May','June',
@@ -88,46 +107,59 @@ function monthKey(month, year) {
 // DATA MANAGEMENT
 // ═══════════════════════════════════════════════════════════
 
-function loadState() {
+function resetState() {
+  state = {
+    month: new Date().getMonth(),
+    year: new Date().getFullYear(),
+    habits: DEFAULT_HABITS.map((name, i) => ({
+      id: 'h_' + i + '_' + Date.now(),
+      name,
+      goal: ''
+    })),
+    weeklyHabits: DEFAULT_WEEKLY_HABITS.map(w => [...w]),
+    theme: 'default',
+    data: {}
+  };
+}
+
+async function loadStateFromFirebase(uid) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const saved = JSON.parse(raw);
+    const docRef = doc(db, 'users', uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const saved = docSnap.data();
       state.habits = saved.habits || [];
       state.weeklyHabits = saved.weeklyHabits || [];
       state.data = saved.data || {};
       state.theme = saved.theme || 'default';
       if (saved.month !== undefined) state.month = saved.month;
       if (saved.year !== undefined) state.year = saved.year;
+    } else {
+      resetState();
     }
   } catch (e) {
-    console.warn('Failed to load state:', e);
+    console.warn('Failed to load state from Firebase:', e);
+    resetState();
   }
-  // Initialize with defaults if empty
+  
   if (state.habits.length === 0) {
-    state.habits = DEFAULT_HABITS.map((name, i) => ({
-      id: 'h_' + i + '_' + Date.now(),
-      name,
-      goal: ''
-    }));
-  }
-  if (state.weeklyHabits.length === 0) {
-    state.weeklyHabits = DEFAULT_WEEKLY_HABITS.map(w => [...w]);
+    resetState();
   }
 }
 
-function saveState() {
+async function saveState() {
+  if (!currentUser) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    await setDoc(doc(db, 'users', currentUser.uid), {
       month: state.month,
       year: state.year,
       habits: state.habits,
       weeklyHabits: state.weeklyHabits,
       theme: state.theme,
       data: state.data
-    }));
+    });
   } catch (e) {
-    console.warn('Failed to save state:', e);
+    console.warn('Failed to save state to Firebase:', e);
   }
 }
 
@@ -1095,7 +1127,6 @@ function initYearlyView() {
 }
 
 function init() {
-  loadState();
   initSelectors();
   initThemeSelector();
   initNotes();
@@ -1115,4 +1146,39 @@ function init() {
 }
 
 // Start
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  
+  loginBtn.addEventListener('click', () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(error => {
+      console.error('Login failed:', error);
+      alert('Login failed. Please check your Firebase configuration.');
+    });
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    signOut(auth);
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    const loginOverlay = document.getElementById('login-overlay');
+    const dashboard = document.getElementById('dashboard');
+
+    if (user) {
+      currentUser = user;
+      loginOverlay.classList.remove('active');
+      dashboard.style.display = 'flex'; // Use flex to match original dashboard flow, wait actually it's a grid/flex layout, we'll just remove display: none by setting it to ''
+      dashboard.style.display = '';
+      
+      await loadStateFromFirebase(user.uid);
+      init();
+    } else {
+      currentUser = null;
+      loginOverlay.classList.add('active');
+      dashboard.style.display = 'none';
+      resetState();
+    }
+  });
+});
