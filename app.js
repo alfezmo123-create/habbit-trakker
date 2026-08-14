@@ -7,13 +7,14 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signO
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDnb0zCDablR3GE70_2HpsKUwRz9YJdcVI",
+  authDomain: "habittracker-83527.firebaseapp.com",
+  projectId: "habittracker-83527",
+  storageBucket: "habittracker-83527.firebasestorage.app",
+  messagingSenderId: "418787353250",
+  appId: "1:418787353250:web:b81138b1da034d3c53edfb"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
