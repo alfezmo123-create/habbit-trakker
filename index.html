@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker | Premium Dynamic Dashboard</title>
+  <meta name="description" content="A premium, fully dynamic habit tracker dashboard with automatic calendar generation, progress tracking, streak counting, and beautiful pastel visualizations. Works for any month and year.">
+  <meta name="keywords" content="habit tracker, productivity, daily habits, weekly habits, progress tracking">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Spider-Verse Custom Sticker Background Layer -->
+  <div class="spiderverse-bg">
+    <!-- Big faint red spider logo in the center -->
+    <img src="spider_logo.png" class="sv-spider" alt="" onerror="this.style.display='none'" />
+    
+    <!-- Left side stickers (Converse, webs, Spider-man heads, etc) -->
+    <img src="stickers_left.png" class="sv-stickers-left" alt="" onerror="this.style.display='none'" />
+    
+    <!-- Right side stickers (Cassette, hearts, polaroid, upside down spidey) -->
+    <img src="stickers_right.png" class="sv-stickers-right" alt="" onerror="this.style.display='none'" />
+  </div>
+
+  <div id="dashboard" class="dashboard">
+
+    <!-- ═══════════════ TOP SECTION ═══════════════ -->
+    <div class="top-section">
+
+      <!-- Title + Month/Year Selectors -->
+      <div class="title-panel">
+        <div class="title-box">
+          <h1>HABIT TRACKER</h1>
+          <div class="action-buttons">
+            <button id="export-csv-btn" class="action-btn" title="Export current month to CSV">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+            </button>
+            <button id="yearly-view-btn" class="action-btn" title="Yearly Overview">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>
+            </button>
+            <button id="theme-toggle-btn" class="action-btn" title="Toggle Dark Mode">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="selector-row">
+          <div class="selector-group">
+            <label for="month-select">MONTH</label>
+            <select id="month-select">
+              <option value="0">January</option>
+              <option value="1">February</option>
+              <option value="2">March</option>
+              <option value="3">April</option>
+              <option value="4">May</option>
+              <option value="5">June</option>
+              <option value="6">July</option>
+              <option value="7">August</option>
+              <option value="8">September</option>
+              <option value="9">October</option>
+              <option value="10">November</option>
+              <option value="11">December</option>
+            </select>
+          </div>
+          <div class="selector-group">
+            <label for="year-select">YEAR</label>
+            <select id="year-select"></select>
+          </div>
+        </div>
+        
+        <div class="theme-selector-container">
+          <select id="theme-select" class="theme-dropdown" title="Change Dashboard Theme">
+            <option value="default">Default Theme</option>
+            <option value="f1">F1 Racing</option>
+            <option value="spiderman">Spider-Man</option>
+            <option value="spiderverse">Spider-Verse (Glass)</option>
+            <option value="aesthetic">Aesthetic Matcha</option>
+            <option value="cyberpunk">Cyberpunk</option>
+            <option value="ocean">Ocean Breeze</option>
+            <option value="forest">Forest Explorer</option>
+            <option value="sunset">Sunset Vibes</option>
+            <option value="retro">Retro Wave</option>
+            <option value="coffee">Coffee Shop</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Daily Progress Area Chart -->
+      <div class="chart-panel">
+        <h2 class="panel-title">DAILY PROGRESS</h2>
+        <div class="chart-wrapper">
+          <canvas id="daily-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Overall Completion Circle -->
+      <div class="overall-panel">
+        <div class="overall-labels">
+          <span class="overall-label-left" id="overall-incomplete-pct"></span>
+          <span class="overall-label-right" id="overall-complete-pct"></span>
+        </div>
+        <div id="overall-progress-ring"></div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ HABIT TABLE SECTION ═══════════════ -->
+    <div class="habit-section">
+      <div class="habit-table-area" id="habit-table-area">
+        <!-- Dynamically generated table -->
+      </div>
+    </div>
+
+    <!-- ═══════════════ BOTTOM SECTION ═══════════════ -->
+    <div class="bottom-section">
+
+      <!-- Weekly Progress Circles + Stats -->
+      <div class="weekly-progress-panel">
+        <h2 class="panel-title">WEEKLY PROGRESS</h2>
+        <div class="weekly-circles" id="weekly-circles"></div>
+        <div class="weekly-stats" id="weekly-stats"></div>
+      </div>
+
+      <!-- Notes -->
+      <div class="notes-panel">
+        <h2 class="panel-title">NOTES</h2>
+        <textarea id="notes-textarea" placeholder="Write your notes here..."></textarea>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ WEEKLY HABITS SECTION ═══════════════ -->
+    <div class="weekly-habits-section" id="weekly-habits-section">
+      <!-- Dynamically generated weekly habits -->
+    </div>
+
+  </div>
+
+  <!-- ═══════════════ YEARLY MODAL ═══════════════ -->
+  <div id="yearly-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="yearly-modal-title" class="panel-title" style="font-size: 14px; text-align: left; margin: 0;">YEARLY OVERVIEW</h2>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="yearly-grid" id="yearly-grid">
+        <!-- Dynamically populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
