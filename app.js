@@ -1395,12 +1395,13 @@ function startApp() {
       
       const profileUsername = document.getElementById('profile-username');
       let displayUsername = 'User';
+      if (user.displayName) {
+        displayUsername = user.displayName;
+      } else if (user.email) {
+        displayUsername = user.email.split('@')[0];
+      }
+      
       if (profileUsername) {
-        if (user.email && user.email.endsWith('@habittracker.local')) {
-          displayUsername = user.email.split('@')[0];
-        } else {
-          displayUsername = user.displayName || user.email || 'User';
-        }
         profileUsername.textContent = displayUsername;
       }
       
