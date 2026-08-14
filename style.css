@@ -1329,7 +1329,7 @@ body.theme-f1 {
   --text-w5: #1a1a1a;
 }
 /* F1 Theme - Dark */
-body[data-theme="dark"].theme-f1 {
+html[data-theme="dark"] body.theme-f1 {
   --bg: #1c1c1c; 
   --bg-card: #2b2b2b;
   --text: #f0f0f0;
@@ -1374,7 +1374,7 @@ body.theme-spiderman {
   --text-w5: #ffffff;
 }
 /* Spider-Man - Dark */
-body[data-theme="dark"].theme-spiderman {
+html[data-theme="dark"] body.theme-spiderman {
   --bg: #091223;
   --bg-card: #132442;
   --text: #e6e6e6;
@@ -1426,7 +1426,7 @@ body.theme-spiderverse {
   --text-w5: #ffffff;
 }
 /* Spider-Verse - Dark */
-body[data-theme="dark"].theme-spiderverse {
+html[data-theme="dark"] body.theme-spiderverse {
   background-color: #0b1120 !important;
   background-image: 
     radial-gradient(circle at center, transparent 30%, #0b1120 90%),
@@ -1474,7 +1474,7 @@ body.theme-spiderverse .dashboard {
   position: relative;
   z-index: 1;
 }
-body[data-theme="dark"].theme-spiderverse .dashboard {
+html[data-theme="dark"] body.theme-spiderverse .dashboard {
   background: rgba(10, 15, 30, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
@@ -1542,7 +1542,7 @@ body.theme-aesthetic {
   --text-w5: #1a1a1a;
 }
 /* Aesthetic Matcha - Dark */
-body[data-theme="dark"].theme-aesthetic {
+html[data-theme="dark"] body.theme-aesthetic {
   --bg: #1f1b18;
   --bg-card: #2c2724;
   --text: #d9d9d9;
@@ -1587,7 +1587,7 @@ body.theme-cyberpunk {
   --text-w5: #1a1a1a;
 }
 /* Cyberpunk - Dark */
-body[data-theme="dark"].theme-cyberpunk {
+html[data-theme="dark"] body.theme-cyberpunk {
   --bg: #0b021a;
   --bg-card: #1c0e33;
   --text: #f0f0f0;
@@ -1632,7 +1632,7 @@ body.theme-ocean {
   --text-w5: #1a1a1a;
 }
 /* Ocean Breeze - Dark */
-body[data-theme="dark"].theme-ocean {
+html[data-theme="dark"] body.theme-ocean {
   --bg: #0c1a2e;
   --bg-card: #153154;
   --text: #e6f0fa;
@@ -1677,7 +1677,7 @@ body.theme-forest {
   --text-w5: #ffffff;
 }
 /* Forest Explorer - Dark */
-body[data-theme="dark"].theme-forest {
+html[data-theme="dark"] body.theme-forest {
   --bg: #121c13;
   --bg-card: #1e2b1f;
   --text: #e1ede2;
@@ -1722,7 +1722,7 @@ body.theme-sunset {
   --text-w5: #ffffff;
 }
 /* Sunset Vibes - Dark */
-body[data-theme="dark"].theme-sunset {
+html[data-theme="dark"] body.theme-sunset {
   --bg: #291124;
   --bg-card: #3f1832;
   --text: #ffebf2;
@@ -1767,7 +1767,7 @@ body.theme-retro {
   --text-w5: #ffffff;
 }
 /* Retro Wave - Dark */
-body[data-theme="dark"].theme-retro {
+html[data-theme="dark"] body.theme-retro {
   --bg: #0d0a21;
   --bg-card: #181236;
   --text: #e5dff2;
@@ -1812,7 +1812,7 @@ body.theme-coffee {
   --text-w5: #ffffff;
 }
 /* Coffee Shop - Dark */
-body[data-theme="dark"].theme-coffee {
+html[data-theme="dark"] body.theme-coffee {
   --bg: #3b2a21;
   --bg-card: #543d31;
   --text: #faebdc;
@@ -2005,3 +2005,4 @@ body[data-theme="dark"].theme-coffee {
 .auth-divider span {
   padding: 0 10px;
 }
+
