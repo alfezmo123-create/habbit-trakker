@@ -5,7 +5,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDnb0zCDablR3GE70_2HpsKUwRz9YJdcVI",
   authDomain: "habittracker-83527.firebaseapp.com",
@@ -15,8 +20,9 @@ const firebaseConfig = {
   appId: "1:418787353250:web:b81138b1da034d3c53edfb"
 };
 
-
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 let currentUser = null;
@@ -24,15 +30,15 @@ let currentUser = null;
 
 // ─── Constants ───
 const MONTH_NAMES = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December'
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-const DAY_LABELS = ['S','M','T','W','T','F','S'];
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-const WEEK_COLORS = ['#AEE7F5','#B8F1C2','#F9C2D8','#F7C46C','#C9D67A'];
-const WEEK_COLORS_DARK = ['#7dcde6','#7be08f','#f08db8','#e9a52e','#a8b84e'];
-const WEEK_CLASSES = ['w1','w2','w3','w4','w5'];
+const WEEK_COLORS = ['#AEE7F5', '#B8F1C2', '#F9C2D8', '#F7C46C', '#C9D67A'];
+const WEEK_COLORS_DARK = ['#7dcde6', '#7be08f', '#f08db8', '#e9a52e', '#a8b84e'];
+const WEEK_CLASSES = ['w1', 'w2', 'w3', 'w4', 'w5'];
 
 const DEFAULT_HABITS = [
   'Hydrate with 2.5L water',
@@ -142,7 +148,7 @@ async function loadStateFromFirebase(uid) {
     console.warn('Failed to load state from Firebase:', e);
     resetState();
   }
-  
+
   if (state.habits.length === 0) {
     resetState();
   }
@@ -456,7 +462,7 @@ function updateTableProgress() {
     const goal = dim;
     const pct = goal === 0 ? 0 : Math.min((completed / goal) * 100, 100);
     const colorClass = getProgressColor(pct);
-    
+
     // Find row
     const row = document.querySelector(`.habit-table tbody tr:nth-child(${hi + 1})`);
     if (row) {
@@ -663,7 +669,7 @@ function renderOverallProgress() {
 
   const container = document.getElementById('overall-progress-ring');
   const existingRing = container.querySelector('.progress-circle-ring');
-  
+
   if (existingRing) {
     // Update in place
     existingRing.style.strokeDashoffset = offset;
@@ -672,16 +678,16 @@ function renderOverallProgress() {
     // Initial render
     const svg = `
       <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-        <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none"
+        <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
           stroke="var(--border-light)" stroke-width="9"/>
-        <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none"
+        <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
           stroke="var(--week1)" stroke-width="9"
           stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
           stroke-linecap="round"
-          transform="rotate(-90 ${size/2} ${size/2})"
+          transform="rotate(-90 ${size / 2} ${size / 2})"
           class="progress-circle-ring"
           style="--circumference: ${circumference}; transition: stroke-dashoffset 0.6s ease"/>
-        <text x="${size/2}" y="${size/2}" text-anchor="middle" dominant-baseline="central"
+        <text x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central"
           font-family="'Calibri','Inter',sans-serif"
           font-size="28" font-weight="700" fill="var(--text-dark)">${Math.round(pct)}%</text>
       </svg>`;
@@ -704,7 +710,7 @@ function renderWeeklyProgress() {
       const hasData = days.length > 0;
       const circ = 2 * Math.PI * 32;
       const off = circ * (1 - pct / 100);
-      
+
       const item = container.children[w];
       if (item) {
         const ring = item.querySelector('.progress-circle-ring');
@@ -730,16 +736,16 @@ function renderWeeklyProgress() {
 
       circlesHtml += `<div class="weekly-circle-item">
         <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-          <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none"
+          <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
             stroke="var(--border-light)" stroke-width="6"/>
-          ${hasData ? `<circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none"
+          ${hasData ? `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
             stroke="var(--week${w + 1})" stroke-width="6"
             stroke-dasharray="${circ}" stroke-dashoffset="${off}"
             stroke-linecap="round"
-            transform="rotate(-90 ${size/2} ${size/2})"
+            transform="rotate(-90 ${size / 2} ${size / 2})"
             class="progress-circle-ring"
             style="--circumference: ${circ}; transition: stroke-dashoffset 0.6s ease"/>` : ''}
-          <text x="${size/2}" y="${size/2}" text-anchor="middle" dominant-baseline="central"
+          <text x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central"
             font-family="'Calibri','Inter',sans-serif"
             font-size="16" font-weight="700" fill="var(--text-dark)">${hasData ? Math.round(pct) + '%' : 'N/A'}</text>
         </svg>
@@ -776,13 +782,13 @@ function renderWeeklyHabits() {
   // Ring
   html += '<div class="wh-summary-ring">';
   html += `<svg width="${ringSize}" height="${ringSize}" viewBox="0 0 ${ringSize} ${ringSize}">
-    <circle cx="${ringSize/2}" cy="${ringSize/2}" r="${ringR}" fill="none" stroke="var(--border-light)" stroke-width="7"/>
-    <circle cx="${ringSize/2}" cy="${ringSize/2}" r="${ringR}" fill="none" stroke="var(--week1)" stroke-width="7"
+    <circle cx="${ringSize / 2}" cy="${ringSize / 2}" r="${ringR}" fill="none" stroke="var(--border-light)" stroke-width="7"/>
+    <circle cx="${ringSize / 2}" cy="${ringSize / 2}" r="${ringR}" fill="none" stroke="var(--week1)" stroke-width="7"
       stroke-dasharray="${ringCirc}" stroke-dashoffset="${ringOff}"
-      stroke-linecap="round" transform="rotate(-90 ${ringSize/2} ${ringSize/2})"
+      stroke-linecap="round" transform="rotate(-90 ${ringSize / 2} ${ringSize / 2})"
       class="progress-circle-ring"
       style="--circumference: ${ringCirc}; transition: stroke-dashoffset 0.6s ease"/>
-    <text x="${ringSize/2}" y="${ringSize/2}" text-anchor="middle" dominant-baseline="central"
+    <text x="${ringSize / 2}" y="${ringSize / 2}" text-anchor="middle" dominant-baseline="central"
       font-family="'Calibri','Inter',sans-serif"
       font-size="20" font-weight="700" fill="var(--text-dark)">${Math.round(overallPct)}%</text>
   </svg>`;
@@ -974,7 +980,7 @@ const THEME_STICKERS = {
 function applyTheme(themeValue) {
   // Clear any existing theme classes
   document.body.className = document.body.className.replace(/\btheme-\S+/g, '').trim();
-  
+
   if (themeValue !== 'default') {
     document.body.classList.add('theme-' + themeValue);
   }
@@ -982,8 +988,8 @@ function applyTheme(themeValue) {
   // Set sticker as subtle body background
   if (THEME_STICKERS[themeValue]) {
     // If it's a full path (C:/), use file:///, otherwise relative
-    const path = THEME_STICKERS[themeValue].includes(':/') 
-      ? `file:///${THEME_STICKERS[themeValue].replace(/\\/g, '/')}` 
+    const path = THEME_STICKERS[themeValue].includes(':/')
+      ? `file:///${THEME_STICKERS[themeValue].replace(/\\/g, '/')}`
       : THEME_STICKERS[themeValue];
 
     document.body.style.backgroundImage = `url('${path}')`;
@@ -1029,8 +1035,8 @@ function initNotes() {
 
 function exportToCSV() {
   const daysInMonth = getDaysInMonth(state.month, state.year);
-  let csv = 'Habit,' + Array.from({length: daysInMonth}, (_, i) => i + 1).join(',') + '\n';
-  
+  let csv = 'Habit,' + Array.from({ length: daysInMonth }, (_, i) => i + 1).join(',') + '\n';
+
   state.habits.forEach((habit) => {
     let row = `"${habit.name.replace(/"/g, '""')}"`;
     for (let d = 1; d <= daysInMonth; d++) {
@@ -1038,7 +1044,7 @@ function exportToCSV() {
     }
     csv += row + '\n';
   });
-  
+
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -1057,12 +1063,12 @@ function initExport() {
 function initThemeToggle() {
   const btn = document.getElementById('theme-toggle-btn');
   if (!btn) return;
-  
+
   const savedTheme = localStorage.getItem(STORAGE_KEY + '_theme') || 'light';
   if (savedTheme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
   }
-  
+
   btn.addEventListener('click', () => {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (isDark) {
@@ -1081,19 +1087,19 @@ function initYearlyView() {
   const modal = document.getElementById('yearly-modal');
   const closeBtn = document.getElementById('close-modal-btn');
   const grid = document.getElementById('yearly-grid');
-  
+
   if (!btn || !modal) return;
-  
+
   btn.addEventListener('click', () => {
     document.getElementById('yearly-modal-title').textContent = `${state.year} OVERVIEW`;
-    
+
     let html = '';
     for (let m = 0; m < 12; m++) {
       const mk = monthKey(m, state.year);
       const days = getDaysInMonth(m, state.year);
       let totalChecks = 0;
       let possibleChecks = state.habits.length * days;
-      
+
       if (state.data[mk] && state.data[mk].checks) {
         state.habits.forEach(h => {
           for (let d = 1; d <= days; d++) {
@@ -1103,9 +1109,9 @@ function initYearlyView() {
           }
         });
       }
-      
+
       const pct = possibleChecks === 0 ? 0 : Math.round((totalChecks / possibleChecks) * 100);
-      
+
       html += `
         <div class="yearly-month-card">
           <div class="yearly-month-name">${MONTH_NAMES[m]}</div>
@@ -1113,15 +1119,15 @@ function initYearlyView() {
         </div>
       `;
     }
-    
+
     grid.innerHTML = html;
     modal.classList.add('active');
   });
-  
+
   closeBtn.addEventListener('click', () => {
     modal.classList.remove('active');
   });
-  
+
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.classList.remove('active');
   });
@@ -1150,12 +1156,12 @@ function init() {
 document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById('login-btn');
   const logoutBtn = document.getElementById('logout-btn');
-  
+
   loginBtn.addEventListener('click', () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider).catch(error => {
       console.error('Login failed:', error);
-      alert('Login failed. Please check your Firebase configuration.');
+      alert(`Login failed: ${error.message} (Code: ${error.code})`);
     });
   });
 
@@ -1172,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loginOverlay.classList.remove('active');
       dashboard.style.display = 'flex'; // Use flex to match original dashboard flow, wait actually it's a grid/flex layout, we'll just remove display: none by setting it to ''
       dashboard.style.display = '';
-      
+
       await loadStateFromFirebase(user.uid);
       init();
     } else {
