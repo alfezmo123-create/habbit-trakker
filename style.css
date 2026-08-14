@@ -1306,8 +1306,30 @@ select option {
    CUSTOM THEMES
    ═══════════════════════════════════════════════════════════ */
 
-/* F1 Theme */
+/* F1 Theme - Light */
 body.theme-f1 {
+  --bg: #f5f5f5; 
+  --bg-card: #ffffff;
+  --text: #333333;
+  --text-light: #777777;
+  --text-dark: #111111;
+  --border: #e10600; 
+  --border-light: #dddddd;
+  --header-bg: #e10600; 
+  --header-bg-light: #ffcccc;
+  --week1: #e10600; 
+  --week2: #333333; 
+  --week3: #ff2800; 
+  --week4: #aaaaaa; 
+  --week5: #ffdf00; 
+  --text-w1: #ffffff;
+  --text-w2: #ffffff;
+  --text-w3: #ffffff;
+  --text-w4: #1a1a1a;
+  --text-w5: #1a1a1a;
+}
+/* F1 Theme - Dark */
+body[data-theme="dark"].theme-f1 {
   --bg: #1c1c1c; 
   --bg-card: #2b2b2b;
   --text: #f0f0f0;
@@ -1329,8 +1351,30 @@ body.theme-f1 {
   --text-w5: #1a1a1a;
 }
 
-/* Spider-Man */
+/* Spider-Man - Light */
 body.theme-spiderman {
+  --bg: #f0f4f8;
+  --bg-card: #ffffff;
+  --text: #333333;
+  --text-light: #667788;
+  --text-dark: #0a1b38;
+  --border: #e23636;
+  --border-light: #cce0ff;
+  --header-bg: #e23636;
+  --header-bg-light: #d6e4f9;
+  --week1: #e23636; 
+  --week2: #2459a5; 
+  --week3: #ffc933; 
+  --week4: #0a1b38; 
+  --week5: #ff4d4d; 
+  --text-w1: #ffffff;
+  --text-w2: #ffffff;
+  --text-w3: #1a1a1a;
+  --text-w4: #ffffff;
+  --text-w5: #ffffff;
+}
+/* Spider-Man - Dark */
+body[data-theme="dark"].theme-spiderman {
   --bg: #091223;
   --bg-card: #132442;
   --text: #e6e6e6;
@@ -1352,10 +1396,38 @@ body.theme-spiderman {
   --text-w5: #ffffff;
 }
 
-/* Spider-Verse (Glassmorphism) */
+/* Spider-Verse - Light */
 body.theme-spiderverse {
+  background-color: #f8f9fa !important;
+  background-image: 
+    radial-gradient(circle at center, transparent 30%, #f8f9fa 90%),
+    repeating-radial-gradient(circle at center, transparent, transparent 40px, rgba(0, 0, 0, 0.04) 41px, transparent 42px),
+    repeating-conic-gradient(from 0deg at center, transparent, transparent 15deg, rgba(0, 0, 0, 0.04) 15.5deg, transparent 16deg) !important;
+  background-attachment: fixed !important;
+  
+  --bg: transparent; 
+  --bg-card: rgba(255, 255, 255, 0.65);
+  --border: rgba(0, 0, 0, 0.15);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --text: #333333;
+  --text-light: #666666;
+  --text-dark: #000000;
+  --header-bg: rgba(0, 0, 0, 0.05);
+  --header-bg-light: rgba(0, 0, 0, 0.03);
+  --week1: #ff007f; 
+  --week2: #00ffff; 
+  --week3: #ffc933; 
+  --week4: #1a1a1a; 
+  --week5: #ff4d4d;
+  --text-w1: #ffffff;
+  --text-w2: #1a1a1a;
+  --text-w3: #1a1a1a;
+  --text-w4: #ffffff;
+  --text-w5: #ffffff;
+}
+/* Spider-Verse - Dark */
+body[data-theme="dark"].theme-spiderverse {
   background-color: #0b1120 !important;
-  /* CSS generated Spider-Web background */
   background-image: 
     radial-gradient(circle at center, transparent 30%, #0b1120 90%),
     repeating-radial-gradient(circle at center, transparent, transparent 40px, rgba(255, 255, 255, 0.04) 41px, transparent 42px),
@@ -1395,15 +1467,19 @@ body.theme-spiderverse .wh-week-col {
 }
 
 body.theme-spiderverse .dashboard {
-  background: rgba(10, 15, 30, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 1;
 }
+body[data-theme="dark"].theme-spiderverse .dashboard {
+  background: rgba(10, 15, 30, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+}
 
-/* Spider-Verse Sticker Arrangement */
 .spiderverse-bg {
   display: none;
   position: fixed;
@@ -1443,7 +1519,7 @@ body.theme-spiderverse .spiderverse-bg {
   opacity: 0.85;
 }
 
-/* Aesthetic Matcha */
+/* Aesthetic Matcha - Light */
 body.theme-aesthetic {
   --bg: #f5f0e6;
   --bg-card: #ffffff;
@@ -1465,9 +1541,53 @@ body.theme-aesthetic {
   --text-w4: #1a1a1a;
   --text-w5: #1a1a1a;
 }
+/* Aesthetic Matcha - Dark */
+body[data-theme="dark"].theme-aesthetic {
+  --bg: #1f1b18;
+  --bg-card: #2c2724;
+  --text: #d9d9d9;
+  --text-light: #8c8c8c;
+  --text-dark: #f0f0f0;
+  --border: #64735c;
+  --border-light: #3e4739;
+  --header-bg: #64735c;
+  --header-bg-light: #475241;
+  --week1: #64735c;
+  --week2: #a36f6f; 
+  --week3: #997e68; 
+  --week4: #5d7d7d; 
+  --week5: #9c6c8e; 
+  --text-w1: #ffffff;
+  --text-w2: #ffffff;
+  --text-w3: #ffffff;
+  --text-w4: #ffffff;
+  --text-w5: #ffffff;
+}
 
-/* Cyberpunk */
+/* Cyberpunk - Light */
 body.theme-cyberpunk {
+  --bg: #fcf4ff;
+  --bg-card: #ffffff;
+  --text: #333333;
+  --text-light: #8866aa;
+  --text-dark: #1a0033;
+  --border: #ff007f;
+  --border-light: #f0d9ff;
+  --header-bg: #ff007f;
+  --header-bg-light: #ffccf0;
+  --week1: #ff007f; 
+  --week2: #00ccff; 
+  --week3: #b000ff; 
+  --week4: #00cc00; 
+  --week5: #ffaa00; 
+  --text-w1: #ffffff;
+  --text-w2: #1a1a1a;
+  --text-w3: #ffffff;
+  --text-w4: #1a1a1a;
+  --text-w5: #1a1a1a;
+}
+/* Cyberpunk - Dark */
+body[data-theme="dark"].theme-cyberpunk {
   --bg: #0b021a;
   --bg-card: #1c0e33;
   --text: #f0f0f0;
@@ -1489,8 +1609,30 @@ body.theme-cyberpunk {
   --text-w5: #1a1a1a;
 }
 
-/* Ocean Breeze */
+/* Ocean Breeze - Light */
 body.theme-ocean {
+  --bg: #f0f8ff;
+  --bg-card: #ffffff;
+  --text: #333333;
+  --text-light: #6688aa;
+  --text-dark: #002244;
+  --border: #3bb2b8;
+  --border-light: #cceeff;
+  --header-bg: #3bb2b8;
+  --header-bg-light: #b3e6ff;
+  --week1: #3bb2b8;
+  --week2: #217ba3;
+  --week3: #58ccdb;
+  --week4: #aae0e8;
+  --week5: #f2e3c6; 
+  --text-w1: #ffffff;
+  --text-w2: #ffffff;
+  --text-w3: #1a1a1a;
+  --text-w4: #1a1a1a;
+  --text-w5: #1a1a1a;
+}
+/* Ocean Breeze - Dark */
+body[data-theme="dark"].theme-ocean {
   --bg: #0c1a2e;
   --bg-card: #153154;
   --text: #e6f0fa;
@@ -1512,8 +1654,30 @@ body.theme-ocean {
   --text-w5: #1a1a1a;
 }
 
-/* Forest Explorer */
+/* Forest Explorer - Light */
 body.theme-forest {
+  --bg: #f4f7f4;
+  --bg-card: #ffffff;
+  --text: #333333;
+  --text-light: #778877;
+  --text-dark: #112211;
+  --border: #4a7c43;
+  --border-light: #dceddc;
+  --header-bg: #4a7c43;
+  --header-bg-light: #c2dcc2;
+  --week1: #4a7c43;
+  --week2: #658a5c;
+  --week3: #8a7350;
+  --week4: #a8b89e;
+  --week5: #476b42;
+  --text-w1: #ffffff;
+  --text-w2: #ffffff;
+  --text-w3: #ffffff;
+  --text-w4: #1a1a1a;
+  --text-w5: #ffffff;
+}
+/* Forest Explorer - Dark */
+body[data-theme="dark"].theme-forest {
   --bg: #121c13;
   --bg-card: #1e2b1f;
   --text: #e1ede2;
@@ -1535,8 +1699,30 @@ body.theme-forest {
   --text-w5: #ffffff;
 }
 
-/* Sunset Vibes */
+/* Sunset Vibes - Light */
 body.theme-sunset {
+  --bg: #fff0f5;
+  --bg-card: #ffffff;
+  --text: #333333;
+  --text-light: #aa8899;
+  --text-dark: #660033;
+  --border: #ff5757;
+  --border-light: #ffdddd;
+  --header-bg: #ff5757;
+  --header-bg-light: #ffbbbb;
+  --week1: #ff5757;
+  --week2: #ff8c42;
+  --week3: #ffc933;
+  --week4: #d84576;
+  --week5: #8c3b7a;
+  --text-w1: #ffffff;
+  --text-w2: #1a1a1a;
+  --text-w3: #1a1a1a;
+  --text-w4: #ffffff;
+  --text-w5: #ffffff;
+}
+/* Sunset Vibes - Dark */
+body[data-theme="dark"].theme-sunset {
   --bg: #291124;
   --bg-card: #3f1832;
   --text: #ffebf2;
@@ -1558,8 +1744,30 @@ body.theme-sunset {
   --text-w5: #ffffff;
 }
 
-/* Retro Wave */
+/* Retro Wave - Light */
 body.theme-retro {
+  --bg: #f8f5ff;
+  --bg-card: #ffffff;
+  --text: #333333;
+  --text-light: #8877aa;
+  --text-dark: #ff2a6d;
+  --border: #05d9e8;
+  --border-light: #ddfaff;
+  --header-bg: #05d9e8;
+  --header-bg-light: #b0f4ff;
+  --week1: #ff2a6d;
+  --week2: #05d9e8;
+  --week3: #4cc9f0;
+  --week4: #ff7a59;
+  --week5: #b026ff;
+  --text-w1: #ffffff;
+  --text-w2: #1a1a1a;
+  --text-w3: #1a1a1a;
+  --text-w4: #1a1a1a;
+  --text-w5: #ffffff;
+}
+/* Retro Wave - Dark */
+body[data-theme="dark"].theme-retro {
   --bg: #0d0a21;
   --bg-card: #181236;
   --text: #e5dff2;
@@ -1581,8 +1789,30 @@ body.theme-retro {
   --text-w5: #ffffff;
 }
 
-/* Coffee Shop */
+/* Coffee Shop - Light */
 body.theme-coffee {
+  --bg: #fdfaf6;
+  --bg-card: #ffffff;
+  --text: #4a3b32;
+  --text-light: #a38c80;
+  --text-dark: #2a1f18;
+  --border: #c48b64;
+  --border-light: #f5eadd;
+  --header-bg: #c48b64;
+  --header-bg-light: #e6c9b3;
+  --week1: #875c44;
+  --week2: #c48b64;
+  --week3: #deb597;
+  --week4: #ebd4c3;
+  --week5: #5c3b28;
+  --text-w1: #ffffff;
+  --text-w2: #ffffff;
+  --text-w3: #1a1a1a;
+  --text-w4: #1a1a1a;
+  --text-w5: #ffffff;
+}
+/* Coffee Shop - Dark */
+body[data-theme="dark"].theme-coffee {
   --bg: #3b2a21;
   --bg-card: #543d31;
   --text: #faebdc;
