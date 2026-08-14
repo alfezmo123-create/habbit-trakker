@@ -692,30 +692,41 @@ function renderDailyChart() {
 
   if (data.length < 2) return;
 
-  const padX = 10;
-  const padTop = 8;
-  const padBottom = 4;
-  const chartW = W - padX * 2;
+  const padLeft = 32;
+  const padRight = 10;
+  const padTop = 20;
+  const padBottom = 20;
+  const chartW = W - padLeft - padRight;
   const chartH = H - padTop - padBottom;
 
   const style = getComputedStyle(document.body);
   const colorWeek1 = style.getPropertyValue('--week1').trim() || '#B8A9D4';
-  const colorGrid = style.getPropertyValue('--border-light').trim() || '#ececec';
+  const colorText = style.getPropertyValue('--text-light').trim() || '#888';
 
-  // Grid lines (subtle)
-  ctx.strokeStyle = colorGrid;
-  ctx.lineWidth = 0.5;
+  // Grid lines and Y-axis labels
+  ctx.strokeStyle = 'rgba(128, 128, 128, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = colorText;
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  
   for (let i = 0; i <= 4; i++) {
     const y = padTop + (chartH * i) / 4;
+    // Draw grid line
     ctx.beginPath();
-    ctx.moveTo(padX, y);
-    ctx.lineTo(W - padX, y);
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(W - padRight, y);
     ctx.stroke();
+    
+    // Draw label (100%, 75%, 50%, 25%, 0%)
+    const pct = 100 - (i * 25);
+    ctx.fillText(`${pct}%`, padLeft - 6, y);
   }
 
   // Calculate points
   const points = data.map((val, i) => ({
-    x: padX + (i / (data.length - 1)) * chartW,
+    x: padLeft + (i / (data.length - 1)) * chartW,
     y: padTop + chartH - (val / 100) * chartH
   }));
 
