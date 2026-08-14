@@ -1355,17 +1355,22 @@ function startApp() {
   }
 
   const profileBtn = document.getElementById('profile-btn');
-  const profileDropdown = document.getElementById('profile-dropdown');
-  if (profileBtn && profileDropdown) {
-    profileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      profileDropdown.classList.toggle('active');
+  const profileModal = document.getElementById('profile-modal');
+  const closeProfileModalBtn = document.getElementById('close-profile-modal-btn');
+  
+  if (profileBtn && profileModal) {
+    profileBtn.addEventListener('click', () => {
+      profileModal.classList.add('active');
     });
+    
+    if (closeProfileModalBtn) {
+      closeProfileModalBtn.addEventListener('click', () => {
+        profileModal.classList.remove('active');
+      });
+    }
 
-    document.addEventListener('click', (e) => {
-      if (!profileDropdown.contains(e.target) && e.target !== profileBtn) {
-        profileDropdown.classList.remove('active');
-      }
+    profileModal.addEventListener('click', (e) => {
+      if (e.target === profileModal) profileModal.classList.remove('active');
     });
   }
 
