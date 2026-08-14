@@ -4,7 +4,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 // Your web app's Firebase configuration
@@ -126,29 +126,48 @@ function resetState() {
   };
 }
 
-async function loadStateFromFirebase(uid) {
-  try {
-    const docRef = doc(db, 'users', uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const saved = docSnap.data();
-      state.habits = saved.habits || [];
-      state.weeklyHabits = saved.weeklyHabits || [];
-      state.data = saved.data || {};
-      state.theme = saved.theme || 'default';
-      if (saved.month !== undefined) state.month = saved.month;
-      if (saved.year !== undefined) state.year = saved.year;
-    } else {
-      resetState();
-    }
-  } catch (e) {
-    console.warn('Failed to load state from Firebase:', e);
-    resetState();
-  }
+let unsubSnapshot = null;
 
-  if (state.habits.length === 0) {
-    resetState();
-  }
+function loadStateFromFirebase(uid) {
+  return new Promise((resolve) => {
+    try {
+      const docRef = doc(db, 'users', uid);
+      
+      // Clear any previous listeners
+      if (unsubSnapshot) unsubSnapshot();
+
+      unsubSnapshot = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const saved = docSnap.data();
+          state.habits = saved.habits || [];
+          state.weeklyHabits = saved.weeklyHabits || [];
+          state.data = saved.data || {};
+          state.theme = saved.theme || 'default';
+          if (saved.month !== undefined) state.month = saved.month;
+          if (saved.year !== undefined) state.year = saved.year;
+          
+          // Only re-render if the app has already initialized
+          if (document.getElementById('habit-table-area').innerHTML !== '') {
+            render();
+            if (state.theme) applyTheme(state.theme);
+          }
+        } else {
+          if (state.habits.length === 0) resetState();
+        }
+        resolve(); // Resolve promise on first load
+      }, (error) => {
+        console.error("Firebase listen error:", error);
+        if (error.code === 'permission-denied') {
+          alert("Permission Denied: Cannot read from Firebase. Check your Firestore Security Rules.");
+        }
+        resolve(); // Resolve anyway so app can load
+      });
+    } catch (e) {
+      console.warn('Failed to load state from Firebase:', e);
+      if (state.habits.length === 0) resetState();
+      resolve();
+    }
+  });
 }
 
 async function saveState() {
@@ -163,7 +182,10 @@ async function saveState() {
       data: state.data
     });
   } catch (e) {
-    console.warn('Failed to save state to Firebase:', e);
+    console.error('Failed to save state to Firebase:', e);
+    if (e.code === 'permission-denied') {
+      alert("Permission Denied: Could not save to Firebase. Please go to your Firebase Console -> Firestore Database -> Rules, and set: allow read, write: if request.auth != null;");
+    }
   }
 }
 
@@ -1149,40 +1171,59 @@ function init() {
   });
 }
 
-// Start
-document.addEventListener('DOMContentLoaded', () => {
+function startApp() {
   const loginBtn = document.getElementById('login-btn');
   const logoutBtn = document.getElementById('logout-btn');
 
-  loginBtn.addEventListener('click', () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).catch(error => {
-      console.error('Login failed:', error);
-      alert(`Login failed: ${error.message} (Code: ${error.code})`);
-    });
-  });
+  console.log("App starting, loginBtn:", loginBtn);
 
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth);
-  });
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      console.log("Sign in button clicked!");
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider).catch(error => {
+        console.error('Login failed:', error);
+        alert(`Login failed: ${error.message} (Code: ${error.code})`);
+      });
+    });
+  } else {
+    console.error("Could not find login-btn in the DOM!");
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      console.log("Logout button clicked!");
+      signOut(auth);
+    });
+  }
 
   onAuthStateChanged(auth, async (user) => {
+    console.log("Auth state changed, user:", user ? user.uid : null);
     const loginOverlay = document.getElementById('login-overlay');
     const dashboard = document.getElementById('dashboard');
 
     if (user) {
       currentUser = user;
-      loginOverlay.classList.remove('active');
-      dashboard.style.display = 'flex'; // Use flex to match original dashboard flow, wait actually it's a grid/flex layout, we'll just remove display: none by setting it to ''
-      dashboard.style.display = '';
+      if (loginOverlay) loginOverlay.classList.remove('active');
+      if (dashboard) {
+        dashboard.style.display = 'flex';
+        dashboard.style.display = '';
+      }
 
       await loadStateFromFirebase(user.uid);
       init();
     } else {
       currentUser = null;
-      loginOverlay.classList.add('active');
-      dashboard.style.display = 'none';
+      if (loginOverlay) loginOverlay.classList.add('active');
+      if (dashboard) dashboard.style.display = 'none';
       resetState();
     }
   });
-});
+}
+
+// Since type="module" implies deferred execution, the DOM might already be loaded.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
+}
