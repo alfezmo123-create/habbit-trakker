@@ -192,7 +192,18 @@ function loadStateFromFirebase(uid) {
           } else {
             // Cloud is newer or equal. Use cloud data.
             state.habits = saved.habits || [];
-            state.weeklyHabits = saved.weeklyHabits || [];
+            
+            // Restore weeklyHabits from string if available, otherwise fallback
+            if (saved.weeklyHabitsStr) {
+              try {
+                state.weeklyHabits = JSON.parse(saved.weeklyHabitsStr);
+              } catch(e) {
+                state.weeklyHabits = saved.weeklyHabits || [];
+              }
+            } else {
+              state.weeklyHabits = saved.weeklyHabits || [];
+            }
+            
             state.data = saved.data || {};
             state.theme = saved.theme || 'default';
             state.lastUpdated = cloudTime;
@@ -244,11 +255,12 @@ async function saveState() {
   saveToLocal(currentUser.uid);
   
   try {
+    // Firestore doesn't support nested arrays, so we stringify weeklyHabits
     await setDoc(doc(db, 'users', currentUser.uid), {
       month: state.month,
       year: state.year,
       habits: state.habits,
-      weeklyHabits: state.weeklyHabits,
+      weeklyHabitsStr: JSON.stringify(state.weeklyHabits),
       theme: state.theme,
       data: state.data,
       lastUpdated: state.lastUpdated
