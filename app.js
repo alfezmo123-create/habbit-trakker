@@ -3,8 +3,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 // Your web app's Firebase configuration
@@ -128,12 +127,43 @@ function resetState() {
 
 let unsubSnapshot = null;
 
+function saveToLocal(uid) {
+  if (!uid) return;
+  localStorage.setItem('habittracker_backup_' + uid, JSON.stringify({
+    month: state.month,
+    year: state.year,
+    habits: state.habits,
+    weeklyHabits: state.weeklyHabits,
+    theme: state.theme,
+    data: state.data
+  }));
+}
+
+function loadFromLocal(uid) {
+  if (!uid) return false;
+  try {
+    const raw = localStorage.getItem('habittracker_backup_' + uid);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      state.habits = saved.habits || [];
+      state.weeklyHabits = saved.weeklyHabits || [];
+      state.data = saved.data || {};
+      state.theme = saved.theme || 'default';
+      if (saved.month !== undefined) state.month = saved.month;
+      if (saved.year !== undefined) state.year = saved.year;
+      return true;
+    }
+  } catch(e) {
+    console.warn("Failed to parse local storage", e);
+  }
+  return false;
+}
+
 function loadStateFromFirebase(uid) {
   return new Promise((resolve) => {
     try {
       const docRef = doc(db, 'users', uid);
       
-      // Clear any previous listeners
       if (unsubSnapshot) unsubSnapshot();
 
       unsubSnapshot = onSnapshot(docRef, (docSnap) => {
@@ -146,25 +176,36 @@ function loadStateFromFirebase(uid) {
           if (saved.month !== undefined) state.month = saved.month;
           if (saved.year !== undefined) state.year = saved.year;
           
-          // Only re-render if the app has already initialized
+          saveToLocal(uid); // Sync valid cloud data to local fallback
+          
           if (document.getElementById('habit-table-area').innerHTML !== '') {
             render();
             if (state.theme) applyTheme(state.theme);
           }
         } else {
-          if (state.habits.length === 0) resetState();
+          // Cloud has no data. Let's try recovering from local storage.
+          if (!loadFromLocal(uid)) {
+            if (state.habits.length === 0) resetState();
+          } else {
+            // Local data exists! Upload it to cloud so it syncs across devices
+            saveState();
+          }
+          if (document.getElementById('habit-table-area').innerHTML !== '') {
+            render();
+          }
         }
-        resolve(); // Resolve promise on first load
+        resolve(); 
       }, (error) => {
         console.error("Firebase listen error:", error);
-        if (error.code === 'permission-denied') {
-          alert("Permission Denied: Cannot read from Firebase. Check your Firestore Security Rules.");
+        // Fallback to local storage if Firebase fails (e.g. bad rules or no DB)
+        if (!loadFromLocal(uid) && state.habits.length === 0) {
+           resetState();
         }
-        resolve(); // Resolve anyway so app can load
+        resolve(); 
       });
     } catch (e) {
-      console.warn('Failed to load state from Firebase:', e);
-      if (state.habits.length === 0) resetState();
+      console.warn('Failed to start Firebase sync:', e);
+      if (!loadFromLocal(uid) && state.habits.length === 0) resetState();
       resolve();
     }
   });
@@ -172,6 +213,10 @@ function loadStateFromFirebase(uid) {
 
 async function saveState() {
   if (!currentUser) return;
+  
+  // ALWAYS save locally first. This guarantees data isn't lost if Firebase fails.
+  saveToLocal(currentUser.uid);
+  
   try {
     await setDoc(doc(db, 'users', currentUser.uid), {
       month: state.month,
@@ -182,10 +227,7 @@ async function saveState() {
       data: state.data
     });
   } catch (e) {
-    console.error('Failed to save state to Firebase:', e);
-    if (e.code === 'permission-denied') {
-      alert("Permission Denied: Could not save to Firebase. Please go to your Firebase Console -> Firestore Database -> Rules, and set: allow read, write: if request.auth != null;");
-    }
+    console.error('Failed to save state to Firebase. Data is safe locally.', e);
   }
 }
 
@@ -1174,6 +1216,82 @@ function init() {
 function startApp() {
   const loginBtn = document.getElementById('login-btn');
   const logoutBtn = document.getElementById('logout-btn');
+
+  const tabLogin = document.getElementById('tab-login');
+  const tabSignup = document.getElementById('tab-signup');
+  const authForm = document.getElementById('auth-form');
+  const authUsername = document.getElementById('auth-username');
+  const authPassword = document.getElementById('auth-password');
+  const authError = document.getElementById('auth-error');
+  const authSubmit = document.getElementById('auth-submit');
+
+  let isSignup = false;
+
+  if (tabLogin && tabSignup) {
+    tabLogin.addEventListener('click', () => {
+      isSignup = false;
+      tabLogin.classList.add('active');
+      tabSignup.classList.remove('active');
+      authSubmit.textContent = 'Log In';
+      authError.style.display = 'none';
+    });
+
+    tabSignup.addEventListener('click', () => {
+      isSignup = true;
+      tabSignup.classList.add('active');
+      tabLogin.classList.remove('active');
+      authSubmit.textContent = 'Sign Up';
+      authError.style.display = 'none';
+    });
+  }
+
+  if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      authError.style.display = 'none';
+      const username = authUsername.value.trim().toLowerCase();
+      const password = authPassword.value;
+
+      // Validate Password: Minimum 8 characters, at least 1 number
+      const passwordRegex = /^(?=.*[0-9]).{8,}$/;
+      if (!passwordRegex.test(password)) {
+        authError.textContent = "Password must be at least 8 characters and contain a number.";
+        authError.style.display = 'block';
+        return;
+      }
+
+      if (!/^[a-z0-9_]+$/.test(username)) {
+        authError.textContent = "Username can only contain letters, numbers, and underscores.";
+        authError.style.display = 'block';
+        return;
+      }
+
+      const fakeEmail = `${username}@habittracker.local`;
+      const originalText = authSubmit.textContent;
+      authSubmit.textContent = 'Please wait...';
+      authSubmit.disabled = true;
+
+      try {
+        if (isSignup) {
+          await createUserWithEmailAndPassword(auth, fakeEmail, password);
+        } else {
+          await signInWithEmailAndPassword(auth, fakeEmail, password);
+        }
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          authError.textContent = "Username already exists. Please choose another.";
+        } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+          authError.textContent = "Invalid username or password.";
+        } else {
+          authError.textContent = "Error: " + error.message;
+        }
+        authError.style.display = 'block';
+      } finally {
+        authSubmit.textContent = originalText;
+        authSubmit.disabled = false;
+      }
+    });
+  }
 
   console.log("App starting, loginBtn:", loginBtn);
 
