@@ -346,6 +346,36 @@ select option {
 }
 
 /* ─── Overall Progress Panel ─── */
+.title-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.greeting-box {
+  margin: auto 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.greeting-time {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.greeting-date {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-top: 5px;
+}
+
 .overall-panel {
   display: flex;
   flex-direction: column;

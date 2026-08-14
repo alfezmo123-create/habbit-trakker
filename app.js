@@ -1394,12 +1394,19 @@ function startApp() {
       currentUser = user;
       
       const profileUsername = document.getElementById('profile-username');
+      let displayUsername = 'User';
       if (profileUsername) {
         if (user.email && user.email.endsWith('@habittracker.local')) {
-          profileUsername.textContent = user.email.split('@')[0];
+          displayUsername = user.email.split('@')[0];
         } else {
-          profileUsername.textContent = user.displayName || user.email || 'User';
+          displayUsername = user.displayName || user.email || 'User';
         }
+        profileUsername.textContent = displayUsername;
+      }
+      
+      // Update our new greeting widget!
+      if (typeof updateGreeting === 'function') {
+        updateGreeting(displayUsername);
       }
 
       if (loginOverlay) loginOverlay.classList.remove('active');
@@ -1418,6 +1425,26 @@ function startApp() {
     }
   });
 }
+
+function updateGreeting(username) {
+  const greetingTime = document.getElementById('greeting-time');
+  const greetingDate = document.getElementById('greeting-date');
+  if (!greetingTime || !greetingDate) return;
+
+  const hour = new Date().getHours();
+  let timeStr = 'Good Evening';
+  if (hour < 12) timeStr = 'Good Morning';
+  else if (hour < 18) timeStr = 'Good Afternoon';
+  
+  const displayUser = username || 'User';
+  greetingTime.textContent = `${timeStr}, ${displayUser}`;
+
+  const dateOpts = { weekday: 'long', month: 'short', day: 'numeric' };
+  greetingDate.textContent = new Date().toLocaleDateString('en-US', dateOpts);
+}
+
+// Ensure it runs once when the file loads for default "User"
+updateGreeting('User');
 
 // Since type="module" implies deferred execution, the DOM might already be loaded.
 if (document.readyState === 'loading') {
