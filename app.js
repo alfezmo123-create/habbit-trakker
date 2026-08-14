@@ -1354,6 +1354,21 @@ function startApp() {
     });
   }
 
+  const profileBtn = document.getElementById('profile-btn');
+  const profileDropdown = document.getElementById('profile-dropdown');
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileDropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!profileDropdown.contains(e.target) && e.target !== profileBtn) {
+        profileDropdown.classList.remove('active');
+      }
+    });
+  }
+
   onAuthStateChanged(auth, async (user) => {
     console.log("Auth state changed, user:", user ? user.uid : null);
     const loginOverlay = document.getElementById('login-overlay');
@@ -1361,6 +1376,16 @@ function startApp() {
 
     if (user) {
       currentUser = user;
+      
+      const profileUsername = document.getElementById('profile-username');
+      if (profileUsername) {
+        if (user.email && user.email.endsWith('@habittracker.local')) {
+          profileUsername.textContent = user.email.split('@')[0];
+        } else {
+          profileUsername.textContent = user.displayName || user.email || 'User';
+        }
+      }
+
       if (loginOverlay) loginOverlay.classList.remove('active');
       if (dashboard) {
         dashboard.style.display = 'flex';
