@@ -70,7 +70,8 @@ let state = {
   habits: [],
   weeklyHabits: [],
   theme: 'default',
-  data: {}   // keyed by "YYYY-M"
+  data: {},   // keyed by "YYYY-M"
+  lastUpdated: 0
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -121,7 +122,8 @@ function resetState() {
     })),
     weeklyHabits: DEFAULT_WEEKLY_HABITS.map(w => [...w]),
     theme: 'default',
-    data: {}
+    data: {},
+    lastUpdated: Date.now()
   };
 }
 
@@ -135,7 +137,8 @@ function saveToLocal(uid) {
     habits: state.habits,
     weeklyHabits: state.weeklyHabits,
     theme: state.theme,
-    data: state.data
+    data: state.data,
+    lastUpdated: state.lastUpdated
   }));
 }
 
@@ -149,6 +152,7 @@ function loadFromLocal(uid) {
       state.weeklyHabits = saved.weeklyHabits || [];
       state.data = saved.data || {};
       state.theme = saved.theme || 'default';
+      state.lastUpdated = saved.lastUpdated || 0;
       if (saved.month !== undefined) state.month = saved.month;
       if (saved.year !== undefined) state.year = saved.year;
       return true;
@@ -169,14 +173,34 @@ function loadStateFromFirebase(uid) {
       unsubSnapshot = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           const saved = docSnap.data();
-          state.habits = saved.habits || [];
-          state.weeklyHabits = saved.weeklyHabits || [];
-          state.data = saved.data || {};
-          state.theme = saved.theme || 'default';
-          if (saved.month !== undefined) state.month = saved.month;
-          if (saved.year !== undefined) state.year = saved.year;
+          const cloudTime = saved.lastUpdated || 0;
           
-          saveToLocal(uid); // Sync valid cloud data to local fallback
+          let localRaw = null;
+          let localTime = 0;
+          try {
+            localRaw = localStorage.getItem('habittracker_backup_' + uid);
+            if (localRaw) {
+              const localParsed = JSON.parse(localRaw);
+              localTime = localParsed.lastUpdated || 0;
+            }
+          } catch(e) {}
+
+          if (localTime > cloudTime && localTime > 0) {
+            // Local is newer. Use local data and sync to cloud.
+            loadFromLocal(uid);
+            saveState();
+          } else {
+            // Cloud is newer or equal. Use cloud data.
+            state.habits = saved.habits || [];
+            state.weeklyHabits = saved.weeklyHabits || [];
+            state.data = saved.data || {};
+            state.theme = saved.theme || 'default';
+            state.lastUpdated = cloudTime;
+            if (saved.month !== undefined) state.month = saved.month;
+            if (saved.year !== undefined) state.year = saved.year;
+            
+            saveToLocal(uid); // Sync valid cloud data to local fallback
+          }
           
           if (document.getElementById('habit-table-area').innerHTML !== '') {
             render();
@@ -214,6 +238,8 @@ function loadStateFromFirebase(uid) {
 async function saveState() {
   if (!currentUser) return;
   
+  state.lastUpdated = Date.now();
+  
   // ALWAYS save locally first. This guarantees data isn't lost if Firebase fails.
   saveToLocal(currentUser.uid);
   
@@ -224,7 +250,8 @@ async function saveState() {
       habits: state.habits,
       weeklyHabits: state.weeklyHabits,
       theme: state.theme,
-      data: state.data
+      data: state.data,
+      lastUpdated: state.lastUpdated
     });
   } catch (e) {
     console.error('Failed to save state to Firebase. Data is safe locally.', e);
