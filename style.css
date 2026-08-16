@@ -2006,3 +2006,691 @@ html[data-theme="dark"] body.theme-coffee {
   padding: 0 10px;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   MOBILE BOTTOM NAVIGATION
+   ═══════════════════════════════════════════════════════════ */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  background: var(--bg-card);
+  border-top: 1.5px solid var(--border);
+  display: none; /* shown via JS on mobile */
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+
+.mob-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  min-width: 60px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mob-nav-btn span {
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.mob-nav-btn:active,
+.mob-nav-btn:hover {
+  color: var(--text-dark);
+  background: var(--header-bg-light);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET  (768px – 1023px)
+   ═══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+  body {
+    padding: 6px;
+  }
+
+  .dashboard {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  /* Top section: tighten columns but KEEP 3-column grid */
+  .top-section {
+    display: grid;
+    grid-template-columns: 200px 1fr 130px;
+    gap: 10px;
+  }
+
+  /* Reduce overall ring container to fit tighter */
+  .overall-labels {
+    width: 110px;
+  }
+
+  /* Bottom section stays 2-col but tighter */
+  .bottom-section {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 10px;
+  }
+
+  /* Weekly habits: keep 2-col layout, inner grid stays 5-col but scrollable */
+  .weekly-habits-section {
+    grid-template-columns: 130px 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .wh-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  /* Slightly smaller action buttons for tablet */
+  .action-btn {
+    padding: 5px;
+  }
+
+  /* Hide mobile bottom nav on tablet */
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  /* Modals */
+  .modal-content {
+    padding: 20px;
+    width: 92%;
+  }
+
+  .yearly-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE  (max 767.98px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+
+  /* ── Core Layout ── */
+  html {
+    font-size: 13px;
+  }
+
+  body {
+    padding: 0;
+    background: var(--bg);
+    /* Reserve space for mobile bottom nav */
+    padding-bottom: calc(65px + env(safe-area-inset-bottom));
+  }
+
+  .dashboard {
+    padding: 10px;
+    gap: 10px;
+    box-shadow: none;
+  }
+
+  /* ── TOP SECTION: Stack vertically ── */
+  .top-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Title panel becomes a compact header row */
+  .title-panel {
+    gap: 8px;
+  }
+
+  .title-box {
+    padding: 10px 12px;
+  }
+
+  .title-box h1 {
+    font-size: 14px;
+    letter-spacing: 1.5px;
+  }
+
+  /* Action buttons in desktop header: hide on mobile (bottom nav replaces them) */
+  .action-buttons {
+    display: none;
+  }
+
+  /* Greeting box: single row compact */
+  .greeting-box {
+    padding: 10px 12px !important;
+  }
+
+  #greeting-time {
+    font-size: 10px !important;
+  }
+
+  #greeting-date {
+    font-size: 11px !important;
+  }
+
+  /* Selectors row: keep 2-col side by side */
+  .selector-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .selector-group select {
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+
+  /* Theme selector */
+  .theme-selector-container {
+    margin-top: 8px;
+  }
+
+  .theme-dropdown {
+    font-size: 12px;
+    padding: 9px 10px;
+  }
+
+  /* Chart panel: give it a comfortable min-height */
+  .chart-panel {
+    padding: 10px 12px;
+    min-height: 130px;
+  }
+
+  .chart-wrapper {
+    min-height: 100px;
+  }
+
+  /* Overall progress ring: center it, smaller handled by JS */
+  .overall-panel {
+    padding: 8px 0;
+    min-height: 120px;
+  }
+
+  .overall-labels {
+    width: 100px;
+    font-size: 9px;
+  }
+
+  /* ── HABIT TABLE SECTION ── */
+  .habit-section {
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .habit-table-area {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Thin scrollbar on mobile */
+    scrollbar-width: thin;
+  }
+
+  /* Sticky habit name column */
+  .habit-table .habit-name-col {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--bg-card);
+    /* Keep a right border so it separates visually */
+    border-right: 2px solid var(--border) !important;
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  /* Ensure header cell for habit name also sticky */
+  .habit-table .main-header-cell.daily-habits-header {
+    position: sticky;
+    left: 0;
+    z-index: 4;
+    background: var(--header-bg);
+  }
+
+  /* Sticky progress column on the right */
+  .habit-table .progress-col {
+    position: sticky;
+    right: 0;
+    z-index: 3;
+    background: var(--bg-card);
+    border-left: 2px solid var(--border) !important;
+    width: 110px;
+    min-width: 110px;
+  }
+
+  .habit-table .progress-header {
+    position: sticky;
+    right: 0;
+    z-index: 4;
+    background: var(--header-bg);
+  }
+
+  /* Touch-friendly checkbox cells — bigger tap area */
+  .habit-table .day-col {
+    height: 32px;
+  }
+
+  .day-cell .cb {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+  }
+
+  .day-cell.checked .cb::after {
+    font-size: 16px;
+  }
+
+  /* Habit name font */
+  .habit-name-text,
+  .habit-name-input {
+    font-size: 11px;
+  }
+
+  .habit-idx {
+    font-size: 10px;
+    margin-right: 4px;
+  }
+
+  /* Habit actions always visible on mobile (no hover on touch) */
+  .habit-actions {
+    display: flex;
+  }
+
+  .habit-action-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+
+  /* Stats label col */
+  .stats-label-col {
+    font-size: 10px !important;
+  }
+
+  /* Add habit button */
+  .add-habit-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    min-height: 36px;
+  }
+
+  /* Progress bar items */
+  .progress-item {
+    gap: 4px;
+    padding: 0 6px;
+  }
+
+  .progress-item-label {
+    font-size: 10px;
+    min-width: 32px;
+  }
+
+  .progress-bar-wrap {
+    height: 8px;
+  }
+
+  /* ── BOTTOM SECTION: Single column ── */
+  .bottom-section {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Weekly progress panel */
+  .weekly-progress-panel {
+    padding: 12px;
+  }
+
+  /* Weekly circles: smaller, handled by JS — CSS just ensures wrap */
+  .weekly-circles {
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .weekly-circle-item {
+    flex-shrink: 0;
+  }
+
+  /* Notes panel */
+  .notes-panel {
+    padding: 12px;
+    min-height: 120px;
+  }
+
+  .notes-panel textarea {
+    font-size: 13px;
+    min-height: 90px;
+    line-height: 1.6;
+    /* Better mobile keyboard experience */
+    -webkit-appearance: none;
+  }
+
+  /* ── WEEKLY HABITS SECTION ── */
+  .weekly-habits-section {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  /* Summary: horizontal row on mobile instead of vertical column */
+  .wh-summary {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding-top: 0;
+    justify-content: space-between;
+  }
+
+  .wh-summary-title {
+    font-size: 11px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .wh-summary-ring {
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .wh-summary-bar-wrap {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .wh-summary-pcts {
+    width: auto;
+    padding: 0;
+    gap: 8px;
+  }
+
+  /* Weekly habits grid: horizontal scroll (swipe left/right) */
+  .wh-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 6px;
+  }
+
+  .wh-week-col {
+    min-width: 150px;
+    flex-shrink: 0;
+  }
+
+  .wh-week-title {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+
+  /* Touch-friendly weekly habit items */
+  .wh-item {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  .wh-checkbox {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  /* Weekly habit actions: always show on mobile */
+  .wh-actions {
+    display: flex;
+  }
+
+  .wh-action-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+
+  .add-wh-btn {
+    font-size: 11px;
+    padding: 6px 8px;
+    min-height: 34px;
+    margin-top: 8px;
+  }
+
+  /* ── MODALS ── */
+  .modal-content {
+    width: 95%;
+    max-width: none;
+    padding: 16px;
+    margin: 0 auto;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: var(--radius);
+  }
+
+  .yearly-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .yearly-month-card {
+    padding: 10px 8px;
+  }
+
+  .yearly-month-name {
+    font-size: 11px;
+  }
+
+  .yearly-month-progress {
+    font-size: 16px;
+  }
+
+  /* Profile modal */
+  #profile-modal .modal-content {
+    padding: 20px 16px;
+  }
+
+  /* Close button bigger on mobile */
+  .close-btn {
+    font-size: 28px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .close-btn:hover {
+    background: var(--header-bg-light);
+  }
+
+  /* ── LOGIN PAGE ── */
+  .login-overlay {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: max(40px, env(safe-area-inset-top));
+  }
+
+  .login-box {
+    padding: 28px 20px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: var(--radius);
+  }
+
+  .login-box h2 {
+    font-size: 20px;
+  }
+
+  .form-group input {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+    padding: 12px 14px;
+  }
+
+  .auth-submit-btn {
+    padding: 14px;
+    font-size: 15px;
+    min-height: 48px;
+  }
+
+  .google-login-btn {
+    padding: 14px;
+    font-size: 15px;
+    min-height: 48px;
+  }
+
+  .auth-tab {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  /* ── SPIDER-VERSE THEME STICKERS ── */
+  /* Hide on mobile — they overlap content */
+  .sv-stickers-left,
+  .sv-stickers-right {
+    display: none;
+  }
+
+  .sv-spider {
+    height: 50vh;
+    opacity: 0.08;
+  }
+
+  /* ── SHOW MOBILE BOTTOM NAV ── */
+  .mobile-bottom-nav {
+    display: flex;
+  }
+
+  /* Panel title tweaks */
+  .panel-title {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    margin-bottom: 6px;
+  }
+
+  /* Weekly stats label narrower on mobile */
+  .weekly-stats-label {
+    min-width: 80px;
+    width: 80px;
+    font-size: 9px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — VERY SMALL SCREENS  (max 379.98px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 379.98px) {
+
+  html {
+    font-size: 12px;
+  }
+
+  .dashboard {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .title-box h1 {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  /* Compress selectors */
+  .selector-group label {
+    font-size: 7px;
+    padding: 3px 4px;
+  }
+
+  .selector-group select {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+
+  /* Table name column narrower */
+  .habit-table .habit-name-col {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+  }
+
+  /* Progress col narrower */
+  .habit-table .progress-col {
+    width: 90px;
+    min-width: 90px;
+  }
+
+  /* Yearly grid: 2-col tight */
+  .yearly-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  /* Login box */
+  .login-box {
+    padding: 20px 14px;
+  }
+
+  .login-box h2 {
+    font-size: 18px;
+  }
+
+  .mob-nav-btn {
+    padding: 6px 10px;
+    min-width: 50px;
+  }
+
+  .mob-nav-btn span {
+    font-size: 9px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE — Mobile bottom nav
+   ═══════════════════════════════════════════════════════════ */
+[data-theme="dark"] .mobile-bottom-nav {
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOUCH DEVICE — Remove hover-only states
+   ═══════════════════════════════════════════════════════════ */
+@media (hover: none) {
+  /* Habit actions: always show on touch devices */
+  .habit-actions {
+    display: flex;
+  }
+
+  .wh-actions {
+    display: flex;
+  }
+
+  /* Prevent ugly tap highlight */
+  .day-cell,
+  .wh-item,
+  .action-btn,
+  .add-habit-btn,
+  .add-wh-btn,
+  .mob-nav-btn {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure day cells have proper touch target size */
+  .day-cell {
+    min-height: 32px;
+  }
+}

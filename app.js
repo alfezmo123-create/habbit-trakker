@@ -773,103 +773,77 @@ function renderOverallProgress() {
   document.getElementById('overall-incomplete-pct').textContent = incompletePct.toFixed(1) + '%';
   document.getElementById('overall-complete-pct').textContent = pct.toFixed(1) + '%';
 
-  const size = 130;
-  const r = 52;
+  const size = getResponsiveRingSize('overall');
+  // Scale the radius proportionally to the size (original: r=52 at size=130)
+  const r = Math.round(size * 0.4);
+  const strokeW = size < 110 ? 7 : 9;
+  const fontSize = size < 110 ? 22 : 28;
   const circumference = 2 * Math.PI * r;
   const offset = circumference * (1 - pct / 100);
 
   const container = document.getElementById('overall-progress-ring');
-  const existingRing = container.querySelector('.progress-circle-ring');
+  // Always re-render so size updates on resize/orientation change
+  const svg = `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
+        stroke="var(--border-light)" stroke-width="${strokeW}"/>
+      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
+        stroke="var(--week1)" stroke-width="${strokeW}"
+        stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+        stroke-linecap="round"
+        transform="rotate(-90 ${size / 2} ${size / 2})"
+        class="progress-circle-ring"
+        style="--circumference: ${circumference}; transition: stroke-dashoffset 0.6s ease"/>
+      <text x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central"
+        font-family="'Calibri','Inter',sans-serif"
+        font-size="${fontSize}" font-weight="700" fill="var(--text-dark)">${Math.round(pct)}%</text>
+    </svg>`;
+  container.innerHTML = svg;
 
-  if (existingRing) {
-    // Update in place
-    existingRing.style.strokeDashoffset = offset;
-    container.querySelector('text').textContent = Math.round(pct) + '%';
-  } else {
-    // Initial render
-    const svg = `
-      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-        <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
-          stroke="var(--border-light)" stroke-width="9"/>
-        <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
-          stroke="var(--week1)" stroke-width="9"
-          stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
-          stroke-linecap="round"
-          transform="rotate(-90 ${size / 2} ${size / 2})"
-          class="progress-circle-ring"
-          style="--circumference: ${circumference}; transition: stroke-dashoffset 0.6s ease"/>
-        <text x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central"
-          font-family="'Calibri','Inter',sans-serif"
-          font-size="28" font-weight="700" fill="var(--text-dark)">${Math.round(pct)}%</text>
-      </svg>`;
-    container.innerHTML = svg;
-  }
+  // Keep labels width in sync with rendered SVG size
+  const labels = document.getElementById('overall-incomplete-pct')?.closest('.overall-labels');
+  if (labels) labels.style.width = size + 'px';
 }
 
 // ─── Weekly Progress ───
 function renderWeeklyProgress() {
   const dim = getDaysInMonth(state.month, state.year);
-  const weekCount = getWeekCount(dim);
 
   const container = document.getElementById('weekly-circles');
-  const hasExisting = container.querySelectorAll('.progress-circle-ring').length > 0;
+  const size = getResponsiveRingSize('weekly');
+  const r = Math.round(size * 0.4);
+  const strokeW = size < 70 ? 5 : 6;
+  const fontSize = size < 70 ? 13 : 16;
 
-  if (hasExisting) {
-    for (let w = 0; w < 5; w++) {
-      const days = getWeekDays(w, dim);
-      const pct = days.length > 0 ? calcWeeklyPct(w) : 0;
-      const hasData = days.length > 0;
-      const circ = 2 * Math.PI * 32;
-      const off = circ * (1 - pct / 100);
+  // Always re-render (so size responds to viewport changes)
+  let circlesHtml = '';
+  for (let w = 0; w < 5; w++) {
+    const days = getWeekDays(w, dim);
+    const pct = days.length > 0 ? calcWeeklyPct(w) : 0;
+    const hasData = days.length > 0;
+    const circ = 2 * Math.PI * r;
+    const off = circ * (1 - pct / 100);
 
-      const item = container.children[w];
-      if (item) {
-        const ring = item.querySelector('.progress-circle-ring');
-        const text = item.querySelector('text');
-        if (ring && hasData) {
-          ring.style.strokeDashoffset = off;
-          text.textContent = Math.round(pct) + '%';
-        } else if (text && !hasData) {
-          text.textContent = 'N/A';
-        }
-      }
-    }
-  } else {
-    let circlesHtml = '';
-    for (let w = 0; w < 5; w++) {
-      const days = getWeekDays(w, dim);
-      const pct = days.length > 0 ? calcWeeklyPct(w) : 0;
-      const hasData = days.length > 0;
-      const size = 80;
-      const r = 32;
-      const circ = 2 * Math.PI * r;
-      const off = circ * (1 - pct / 100);
-
-      circlesHtml += `<div class="weekly-circle-item">
-        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-          <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
-            stroke="var(--border-light)" stroke-width="6"/>
-          ${hasData ? `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
-            stroke="var(--week${w + 1})" stroke-width="6"
-            stroke-dasharray="${circ}" stroke-dashoffset="${off}"
-            stroke-linecap="round"
-            transform="rotate(-90 ${size / 2} ${size / 2})"
-            class="progress-circle-ring"
-            style="--circumference: ${circ}; transition: stroke-dashoffset 0.6s ease"/>` : ''}
-          <text x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central"
-            font-family="'Calibri','Inter',sans-serif"
-            font-size="16" font-weight="700" fill="var(--text-dark)">${hasData ? Math.round(pct) + '%' : 'N/A'}</text>
-        </svg>
-      </div>`;
-    }
-    container.innerHTML = circlesHtml;
+    circlesHtml += `<div class="weekly-circle-item">
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
+          stroke="var(--border-light)" stroke-width="${strokeW}"/>
+        ${hasData ? `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none"
+          stroke="var(--week${w + 1})" stroke-width="${strokeW}"
+          stroke-dasharray="${circ}" stroke-dashoffset="${off}"
+          stroke-linecap="round"
+          transform="rotate(-90 ${size / 2} ${size / 2})"
+          class="progress-circle-ring"
+          style="--circumference: ${circ}; transition: stroke-dashoffset 0.6s ease"/>` : ''}
+        <text x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central"
+          font-family="'Calibri','Inter',sans-serif"
+          font-size="${fontSize}" font-weight="700" fill="var(--text-dark)">${hasData ? Math.round(pct) + '%' : 'N/A'}</text>
+      </svg>
+    </div>`;
   }
+  container.innerHTML = circlesHtml;
 
-  // Stats table (removed from here, moved to main table for exact alignment)
-  let statsHtml = '';
-  document.getElementById('weekly-stats').innerHTML = statsHtml;
-
-  document.getElementById('weekly-stats').innerHTML = statsHtml;
+  document.getElementById('weekly-stats').innerHTML = '';
 }
 
 // ─── Weekly Habits Section ───
@@ -880,8 +854,10 @@ function renderWeeklyHabits() {
   const incompletePct = 100 - overallPct;
 
   // Summary (left side)
-  const ringSize = 100;
-  const ringR = 38;
+  const ringSize = getResponsiveRingSize('habits');
+  const ringR = Math.round(ringSize * 0.38);
+  const ringStrokeW = ringSize < 85 ? 6 : 7;
+  const ringFontSize = ringSize < 85 ? 16 : 20;
   const ringCirc = 2 * Math.PI * ringR;
   const ringOff = ringCirc * (1 - overallPct / 100);
 
@@ -893,15 +869,15 @@ function renderWeeklyHabits() {
   // Ring
   html += '<div class="wh-summary-ring">';
   html += `<svg width="${ringSize}" height="${ringSize}" viewBox="0 0 ${ringSize} ${ringSize}">
-    <circle cx="${ringSize / 2}" cy="${ringSize / 2}" r="${ringR}" fill="none" stroke="var(--border-light)" stroke-width="7"/>
-    <circle cx="${ringSize / 2}" cy="${ringSize / 2}" r="${ringR}" fill="none" stroke="var(--week1)" stroke-width="7"
+    <circle cx="${ringSize / 2}" cy="${ringSize / 2}" r="${ringR}" fill="none" stroke="var(--border-light)" stroke-width="${ringStrokeW}"/>
+    <circle cx="${ringSize / 2}" cy="${ringSize / 2}" r="${ringR}" fill="none" stroke="var(--week1)" stroke-width="${ringStrokeW}"
       stroke-dasharray="${ringCirc}" stroke-dashoffset="${ringOff}"
       stroke-linecap="round" transform="rotate(-90 ${ringSize / 2} ${ringSize / 2})"
       class="progress-circle-ring"
       style="--circumference: ${ringCirc}; transition: stroke-dashoffset 0.6s ease"/>
     <text x="${ringSize / 2}" y="${ringSize / 2}" text-anchor="middle" dominant-baseline="central"
       font-family="'Calibri','Inter',sans-serif"
-      font-size="20" font-weight="700" fill="var(--text-dark)">${Math.round(overallPct)}%</text>
+      font-size="${ringFontSize}" font-weight="700" fill="var(--text-dark)">${Math.round(overallPct)}%</text>
   </svg>`;
   html += '</div>';
 
@@ -1040,6 +1016,45 @@ function escHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+/**
+ * Debounce — returns a function that delays invoking fn until
+ * after `wait` ms have elapsed since the last invocation.
+ */
+function debounce(fn, wait) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+/**
+ * Returns appropriate SVG ring sizes for the current viewport.
+ * type: 'overall' | 'weekly' | 'habits'
+ */
+function getResponsiveRingSize(type) {
+  const w = window.innerWidth;
+  if (type === 'overall') {
+    if (w < 380) return 90;
+    if (w < 768) return 100;
+    if (w < 1024) return 120;
+    return 130;
+  }
+  if (type === 'weekly') {
+    if (w < 380) return 56;
+    if (w < 768) return 64;
+    if (w < 1024) return 72;
+    return 80;
+  }
+  if (type === 'habits') {
+    if (w < 380) return 70;
+    if (w < 768) return 80;
+    if (w < 1024) return 90;
+    return 100;
+  }
+  return 100;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1253,14 +1268,33 @@ function init() {
   initYearlyView();
   render();
 
-  // Handle window resize for chart
-  let resizeDebounce;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeDebounce);
-    resizeDebounce = setTimeout(() => {
-      renderDailyChart();
-    }, 200);
-  });
+  // Handle window resize — re-render chart AND all SVG rings
+  // so they resize on orientation change or window resize
+  const handleResize = debounce(() => {
+    renderDailyChart();
+    renderOverallProgress();
+    renderWeeklyProgress();
+    renderWeeklyHabits();
+    // Show/hide mobile bottom nav via JS to support older browsers
+    // that don't update CSS display on resize as expected
+    updateMobileNav();
+  }, 180);
+
+  window.addEventListener('resize', handleResize);
+
+  // Initial mobile nav visibility
+  updateMobileNav();
+}
+
+/** Show mobile bottom nav on small screens, hide on larger. */
+function updateMobileNav() {
+  const nav = document.getElementById('mobile-bottom-nav');
+  if (!nav) return;
+  if (window.innerWidth <= 767.98) {
+    nav.style.display = 'flex';
+  } else {
+    nav.style.display = 'none';
+  }
 }
 
 function startApp() {
@@ -1382,6 +1416,37 @@ function startApp() {
 
     profileModal.addEventListener('click', (e) => {
       if (e.target === profileModal) profileModal.classList.remove('active');
+    });
+  }
+
+  // ── Mobile bottom nav: wire buttons to mirror desktop actions ──
+  const mobProfileBtn = document.getElementById('mob-profile-btn');
+  const mobYearlyBtn  = document.getElementById('mob-yearly-btn');
+  const mobThemeBtn   = document.getElementById('mob-theme-btn');
+  const mobExportBtn  = document.getElementById('mob-export-btn');
+
+  if (mobProfileBtn) {
+    mobProfileBtn.addEventListener('click', () => {
+      document.getElementById('profile-modal')?.classList.add('active');
+    });
+  }
+
+  if (mobYearlyBtn) {
+    mobYearlyBtn.addEventListener('click', () => {
+      // Trigger the same action as the desktop yearly-view-btn
+      document.getElementById('yearly-view-btn')?.click();
+    });
+  }
+
+  if (mobThemeBtn) {
+    mobThemeBtn.addEventListener('click', () => {
+      document.getElementById('theme-toggle-btn')?.click();
+    });
+  }
+
+  if (mobExportBtn) {
+    mobExportBtn.addEventListener('click', () => {
+      exportToCSV();
     });
   }
 
