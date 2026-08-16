@@ -646,6 +646,10 @@ select option {
   padding: 3px 0;
 }
 
+.today-col {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
 .weekday-cell.w1 { background: color-mix(in srgb, var(--week1) 20%, var(--bg-card)); }
 .weekday-cell.w2 { background: color-mix(in srgb, var(--week2) 20%, var(--bg-card)); }
 .weekday-cell.w3 { background: color-mix(in srgb, var(--week3) 20%, var(--bg-card)); }
@@ -801,7 +805,7 @@ select option {
 .progress-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   padding: 0 8px;
   height: 100%;
 }
@@ -812,6 +816,15 @@ select option {
   color: var(--text);
   white-space: nowrap;
   min-width: 40px;
+  text-align: right;
+}
+
+.progress-item-pct {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  min-width: 35px;
   text-align: right;
 }
 
@@ -2226,123 +2239,204 @@ html[data-theme="dark"] body.theme-coffee {
     font-size: 9px;
   }
 
-  /* ── HABIT TABLE SECTION ── */
-  .habit-section {
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .habit-table-area {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    /* Thin scrollbar on mobile */
-    scrollbar-width: thin;
-  }
-
-  /* Sticky habit name column */
-  .habit-table .habit-name-col {
-    position: sticky;
-    left: 0;
-    z-index: 3;
-    background: var(--bg-card);
-    /* Keep a right border so it separates visually */
-    border-right: 2px solid var(--border) !important;
-    width: 140px;
-    min-width: 140px;
-    max-width: 140px;
-    font-size: 11px;
-    padding: 4px 8px;
-  }
-
-  /* Ensure header cell for habit name also sticky */
-  .habit-table .main-header-cell.daily-habits-header {
-    position: sticky;
-    left: 0;
-    z-index: 4;
-    background: var(--header-bg);
-  }
-
-  /* Sticky progress column on the right */
-  .habit-table .progress-col {
-    position: sticky;
-    right: 0;
-    z-index: 3;
-    background: var(--bg-card);
-    border-left: 2px solid var(--border) !important;
-    width: 110px;
-    min-width: 110px;
-  }
-
-  .habit-table .progress-header {
-    position: sticky;
-    right: 0;
-    z-index: 4;
-    background: var(--header-bg);
-  }
-
-  /* Touch-friendly checkbox cells — bigger tap area */
-  .habit-table .day-col {
-    height: 32px;
-  }
-
-  .day-cell .cb {
-    width: 24px;
-    height: 24px;
-    border-radius: 5px;
-  }
-
-  .day-cell.checked .cb::after {
-    font-size: 16px;
-  }
-
-  /* Habit name font */
-  .habit-name-text,
-  .habit-name-input {
-    font-size: 11px;
-  }
-
-  .habit-idx {
-    font-size: 10px;
-    margin-right: 4px;
-  }
-
-  /* Habit actions always visible on mobile (no hover on touch) */
-  .habit-actions {
+  /* ── MOBILE WEEK-BASED UI ── */
+  .mobile-habit-container {
     display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .habit-action-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 12px;
+  .mob-week-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-card);
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
   }
 
-  /* Stats label col */
-  .stats-label-col {
-    font-size: 10px !important;
+  .mob-week-current {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-dark);
   }
 
-  /* Add habit button */
-  .add-habit-btn {
-    font-size: 12px;
-    padding: 6px 12px;
-    min-height: 36px;
+  .mob-week-nav {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* Progress bar items */
-  .progress-item {
-    gap: 4px;
-    padding: 0 6px;
+  .mob-week-nav:hover:not(:disabled) {
+    color: var(--text-dark);
+    background: var(--header-bg-light);
   }
 
-  .progress-item-label {
+  .mob-week-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .mob-day-headers {
+    display: flex;
+    gap: 8px;
+    padding: 0 4px;
+  }
+
+  .mob-day-spacer {
+    flex: 1; /* Pushes days to the right */
+    min-width: 0;
+  }
+
+  .mob-day-header {
+    width: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .mob-dow {
     font-size: 10px;
-    min-width: 32px;
+    font-weight: 700;
+    color: var(--text-light);
   }
 
-  .progress-bar-wrap {
-    height: 8px;
+  .mob-dom {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
   }
+
+  .mob-habit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mob-habit-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mob-habit-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mob-habit-name-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+
+  .mob-checkbox-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .mob-checkbox-spacer {
+    flex: 1;
+  }
+
+  .mob-day-cell {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mob-day-cell .cb {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+  }
+
+  .mob-day-cell.checked .cb::after {
+    font-size: 18px;
+  }
+
+  .mob-add-habit-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  .mob-week-progress {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mob-progress-title {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--text-light);
+    margin: 0;
+    text-align: center;
+  }
+
+  .mob-progress-overall {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+
+  .mob-overall-bar {
+    flex: 1;
+    height: 10px;
+  }
+
+  .mob-pct-text {
+    width: 40px;
+    text-align: right;
+  }
+
+  .mob-progress-habit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-dark);
+  }
+
+  .mob-ph-val {
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--text-light);
+  }
+
 
   /* ── BOTTOM SECTION: Single column ── */
   .bottom-section {

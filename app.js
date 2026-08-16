@@ -71,7 +71,8 @@ let state = {
   weeklyHabits: [],
   theme: 'default',
   data: {},   // keyed by "YYYY-M"
-  lastUpdated: 0
+  lastUpdated: 0,
+  mobileSelectedWeek: 0
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -123,7 +124,8 @@ function resetState() {
     weeklyHabits: DEFAULT_WEEKLY_HABITS.map(w => [...w]),
     theme: 'default',
     data: {},
-    lastUpdated: Date.now()
+    lastUpdated: Date.now(),
+    mobileSelectedWeek: 0
   };
 }
 
@@ -434,11 +436,23 @@ function updateDashboard() {
   renderWeeklyProgress();
 }
 
-// ─── Habit Table ───
+// ─── Habit Table Router ───
 function renderTable() {
+  if (window.innerWidth <= 767.98) {
+    renderMobileTable();
+  } else {
+    renderDesktopTable();
+  }
+}
+
+// ─── Desktop Habit Table ───
+function renderDesktopTable() {
   const dim = getDaysInMonth(state.month, state.year);
   const firstDay = getFirstDayOfWeek(state.month, state.year);
   const weekCount = getWeekCount(dim);
+  const today = new Date();
+  const isCurrentMonth = today.getMonth() === state.month && today.getFullYear() === state.year;
+  const todayDate = today.getDate();
 
   let html = '<table class="habit-table">';
 
@@ -468,7 +482,8 @@ function renderTable() {
   for (let d = 1; d <= dim; d++) {
     const dow = (firstDay + d - 1) % 7;
     const w = getWeekIndex(d);
-    html += `<td class="weekday-cell ${WEEK_CLASSES[w]} day-col">${DAY_LABELS[dow]}</td>`;
+    const todayClass = (isCurrentMonth && d === todayDate) ? ' today-col' : '';
+    html += `<td class="weekday-cell ${WEEK_CLASSES[w]} day-col${todayClass}">${DAY_LABELS[dow]}</td>`;
   }
   html += '</tr>';
 
@@ -476,7 +491,8 @@ function renderTable() {
   html += '<tr>';
   for (let d = 1; d <= dim; d++) {
     const w = getWeekIndex(d);
-    html += `<td class="daynum-cell ${WEEK_CLASSES[w]} day-col">${d}</td>`;
+    const todayClass = (isCurrentMonth && d === todayDate) ? ' today-col' : '';
+    html += `<td class="daynum-cell ${WEEK_CLASSES[w]} day-col${todayClass}">${d}</td>`;
   }
   html += '</tr>';
   html += '</thead>';
@@ -500,7 +516,8 @@ function renderTable() {
     for (let d = 1; d <= dim; d++) {
       const w = getWeekIndex(d);
       const checked = isChecked(habit.id, d);
-      html += `<td class="day-cell ${WEEK_CLASSES[w]}${checked ? ' checked' : ''} day-col"
+      const todayClass = (isCurrentMonth && d === todayDate) ? ' today-col' : '';
+      html += `<td class="day-cell ${WEEK_CLASSES[w]}${checked ? ' checked' : ''} day-col${todayClass}"
         data-hid="${habit.id}" data-day="${d}">
         <div class="cb"></div>
       </td>`;
@@ -508,7 +525,7 @@ function renderTable() {
 
     const completed = calcHabitCompleted(habit);
     const goal = dim;
-    const pct = goal === 0 ? 0 : Math.min((completed / goal) * 100, 100);
+    const pct = Math.round(goal === 0 ? 0 : Math.min((completed / goal) * 100, 100));
     const colorClass = getProgressColor(pct);
 
     html += `<td class="progress-col">
@@ -517,6 +534,7 @@ function renderTable() {
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill ${colorClass}" style="width: ${pct}%"></div>
         </div>
+        <span class="progress-item-pct">${pct}%</span>
       </div>
     </td>`;
     html += '</tr>';
@@ -532,7 +550,8 @@ function renderTable() {
   html += '<td class="habit-name-col stats-label-col">Habits Completed</td>';
   for (let d = 1; d <= dim; d++) {
     const w = getWeekIndex(d);
-    html += `<td class="day-cell ${WEEK_CLASSES[w]} stats-val-col" id="stat-comp-${d}">${calcDayCompleted(d)}</td>`;
+    const todayClass = (isCurrentMonth && d === todayDate) ? ' today-col' : '';
+    html += `<td class="day-cell ${WEEK_CLASSES[w]} stats-val-col${todayClass}" id="stat-comp-${d}">${calcDayCompleted(d)}</td>`;
   }
   html += '<td class="progress-col"></td>';
   html += '</tr>';
@@ -542,7 +561,8 @@ function renderTable() {
   html += '<td class="habit-name-col stats-label-col">Habits Incompleted</td>';
   for (let d = 1; d <= dim; d++) {
     const w = getWeekIndex(d);
-    html += `<td class="day-cell ${WEEK_CLASSES[w]} stats-val-col" id="stat-inc-${d}">${calcDayIncomplete(d)}</td>`;
+    const todayClass = (isCurrentMonth && d === todayDate) ? ' today-col' : '';
+    html += `<td class="day-cell ${WEEK_CLASSES[w]} stats-val-col${todayClass}" id="stat-inc-${d}">${calcDayIncomplete(d)}</td>`;
   }
   html += '<td class="progress-col"></td>';
   html += '</tr>';
@@ -555,12 +575,161 @@ function renderTable() {
   attachTableListeners();
 }
 
+// ─── Mobile Habit Table ───
+function renderMobileTable() {
+  const dim = getDaysInMonth(state.month, state.year);
+  const firstDay = getFirstDayOfWeek(state.month, state.year);
+  const weekCount = getWeekCount(dim);
+  
+  // Ensure selected week is valid for current month
+  if (state.mobileSelectedWeek >= weekCount) {
+    state.mobileSelectedWeek = weekCount - 1;
+  }
+  const w = state.mobileSelectedWeek;
+  const days = getWeekDays(w, dim);
+
+  let html = '<div class="mobile-habit-container">';
+
+  // Week Selector
+  html += `
+    <div class="mob-week-selector">
+      <button class="mob-week-nav" id="mob-prev-week" ${w === 0 ? 'disabled' : ''}>
+        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+      </button>
+      <div class="mob-week-current">WEEK ${w + 1}</div>
+      <button class="mob-week-nav" id="mob-next-week" ${w === weekCount - 1 ? 'disabled' : ''}>
+        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+      </button>
+    </div>
+  `;
+
+  // Day Headers Grid
+  html += `<div class="mob-day-headers">`;
+  html += `<div class="mob-day-spacer"></div>`; // space for habit name
+  days.forEach(d => {
+    const dow = (firstDay + d - 1) % 7;
+    html += `
+      <div class="mob-day-header ${WEEK_CLASSES[w]}">
+        <div class="mob-dow">${DAY_LABELS[dow]}</div>
+        <div class="mob-dom">${d}</div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+
+  // Habit Rows
+  html += `<div class="mob-habit-list">`;
+  state.habits.forEach((habit, hi) => {
+    html += `<div class="mob-habit-card">`;
+    html += `
+      <div class="mob-habit-name-row">
+        <span class="mob-habit-name-text">${hi + 1}. ${escHtml(habit.name)}</span>
+        <button class="habit-action-btn habit-delete" data-idx="${hi}" title="Remove habit">&times;</button>
+      </div>
+    `;
+    html += `<div class="mob-checkbox-row">`;
+    html += `<div class="mob-checkbox-spacer"></div>`; // space to align under days
+    days.forEach(d => {
+      const checked = isChecked(habit.id, d);
+      html += `
+        <div class="mob-day-cell day-cell ${WEEK_CLASSES[w]}${checked ? ' checked' : ''} day-col"
+          data-hid="${habit.id}" data-day="${d}">
+          <div class="cb"></div>
+        </div>
+      `;
+    });
+    html += `</div>`; // end mob-checkbox-row
+    html += `</div>`; // end mob-habit-card
+  });
+  
+  html += `
+    <div class="mob-add-habit-wrapper">
+      <button class="add-habit-btn" id="add-habit-btn">+ Add Habit</button>
+    </div>
+  `;
+  html += `</div>`; // end mob-habit-list
+
+  // Week Progress section
+  html += `<div class="mob-week-progress">`;
+  html += `<h3 class="mob-progress-title">WEEK ${w + 1} PROGRESS</h3>`;
+  
+  // Calculate overall for the week
+  let weekTotalPossible = state.habits.length * days.length;
+  let weekTotalChecked = 0;
+  state.habits.forEach(h => {
+    days.forEach(d => {
+      if (isChecked(h.id, d)) weekTotalChecked++;
+    });
+  });
+  const weekOverallPct = weekTotalPossible === 0 ? 0 : Math.round((weekTotalChecked / weekTotalPossible) * 100);
+  
+  html += `
+    <div class="mob-progress-overall">
+      <span>Overall</span>
+      <div class="progress-bar-wrap mob-overall-bar">
+        <div class="progress-bar-fill pbar-green" style="width: ${weekOverallPct}%"></div>
+      </div>
+      <span class="mob-pct-text">${weekOverallPct}%</span>
+    </div>
+  `;
+  
+  // Progress per habit for the week
+  state.habits.forEach(habit => {
+    let habitWeekChecked = 0;
+    days.forEach(d => {
+      if (isChecked(habit.id, d)) habitWeekChecked++;
+    });
+    html += `
+      <div class="mob-progress-habit-row">
+        <span class="mob-ph-name">${escHtml(habit.name)}</span>
+        <span class="mob-ph-val">${habitWeekChecked} / ${days.length}</span>
+      </div>
+    `;
+  });
+
+  html += `</div>`; // end mob-week-progress
+
+  html += '</div>'; // end mobile-habit-container
+
+  document.getElementById('habit-table-area').innerHTML = html;
+
+  attachTableListeners();
+  
+  // Attach mobile specific listeners
+  const prevBtn = document.getElementById('mob-prev-week');
+  const nextBtn = document.getElementById('mob-next-week');
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (state.mobileSelectedWeek > 0) {
+        state.mobileSelectedWeek--;
+        renderMobileTable();
+      }
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (state.mobileSelectedWeek < weekCount - 1) {
+        state.mobileSelectedWeek++;
+        renderMobileTable();
+      }
+    });
+  }
+}
+
 function updateTableProgress() {
+  if (window.innerWidth <= 767.98) {
+    renderMobileTable(); // easier to just re-render mobile table since it's small and calculates stats
+  } else {
+    updateDesktopTableProgress();
+  }
+}
+
+function updateDesktopTableProgress() {
   const dim = getDaysInMonth(state.month, state.year);
   state.habits.forEach((habit, hi) => {
     const completed = calcHabitCompleted(habit);
     const goal = dim;
-    const pct = goal === 0 ? 0 : Math.min((completed / goal) * 100, 100);
+    const pct = Math.round(goal === 0 ? 0 : Math.min((completed / goal) * 100, 100));
     const colorClass = getProgressColor(pct);
 
     // Find row
@@ -568,7 +737,9 @@ function updateTableProgress() {
     if (row) {
       const label = row.querySelector('.progress-item-label');
       const fill = row.querySelector('.progress-bar-fill');
+      const pctLabel = row.querySelector('.progress-item-pct');
       if (label) label.textContent = `${completed} / ${goal}`;
+      if (pctLabel) pctLabel.textContent = `${pct}%`;
       if (fill) {
         fill.className = `progress-bar-fill ${colorClass}`;
         fill.style.width = `${pct}%`;
@@ -593,7 +764,6 @@ function attachTableListeners() {
       const day = parseInt(cell.dataset.day);
       toggleCheck(hid, day);
       cell.classList.toggle('checked');
-      // Update everything else in-place smoothly
       updateDashboard();
     });
   });
